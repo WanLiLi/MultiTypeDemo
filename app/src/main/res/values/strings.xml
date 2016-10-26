@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">MultiTypeDemo</string>
+
+    <string name="no_brief">暂无简介。</string>
+    <string name="comment">评论</string>
+    <string name="comment_num">人点评</string>
+</resources>
