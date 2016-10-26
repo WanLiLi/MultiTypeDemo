@@ -6,3 +6,7 @@
 的一块功能来演示.
 
 2.采用MVP，rxJava，retrofit。非常有实用性的列子来描述 [MultiType](https://github.com/drakeet/MultiType) 的用法。
+
+
+
+
