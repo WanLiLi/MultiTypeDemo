@@ -10,7 +10,7 @@
 
 3.以下整个界面采用的就是一个recyclerView + [MultiType](https://github.com/drakeet/MultiType) 完成的
 
-![MultiTypeDemo.gif](https://github.com/WanLiLi/MultiTypeDemo/blob/master/multiTypeDemo.gif?raw=true)
+![MultiTypeDemo.gif](https://github.com/WanLiLi/MultiTypeDemo/blob/master/multiTypeDemo1.gif)
 
 
 
