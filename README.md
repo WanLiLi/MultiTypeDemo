@@ -1,0 +1,2 @@
+# MultiTypeDemo
+采用真实的网络请求数据演示MultiType框架的用法，简化recyclerView的复杂列表视图
