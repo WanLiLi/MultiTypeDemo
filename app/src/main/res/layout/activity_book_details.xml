@@ -6,7 +6,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.wanli.com.multitypedemo.api.view.impl.BookDetailsActivity">
-
     <!--?android:actionBarSize-->
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
@@ -14,6 +13,7 @@
         android:layout_height="?android:actionBarSize"
         android:background="@color/colorPrimary"
         android:minHeight="?android:actionBarSize"></android.support.v7.widget.Toolbar>
+
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/ry_details"
@@ -24,5 +24,7 @@
         android:layout_below="@+id/toolbar">
 
     </android.support.v7.widget.RecyclerView>
+
+
 
 </RelativeLayout>

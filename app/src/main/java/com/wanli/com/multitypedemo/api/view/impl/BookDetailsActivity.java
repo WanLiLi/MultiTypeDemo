@@ -85,12 +85,10 @@ public class BookDetailsActivity extends BaseActivity implements IBaseView {
                 multiTypeAdapter.notifyDataSetChanged();
             }
             if (mBookInfoResponse.getSeries() != null) {
-                /**
-                 * 获取推荐丛书
-                 */
                 iBookListPresenter.loadSeries(mBookInfoResponse.getSeries().getId(), 0, 6, SERIES_FIELDS);
             }
         } else if (result instanceof BookSeriesListResponse) {
+            /**获取推荐丛书*/
             list.add(((BookSeriesListResponse) result));
             multiTypeAdapter.register(BookSeriesListResponse.class, new BookSeriesViewProvider());
             multiTypeAdapter.notifyDataSetChanged();

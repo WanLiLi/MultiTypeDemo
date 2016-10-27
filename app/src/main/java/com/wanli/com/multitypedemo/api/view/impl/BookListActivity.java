@@ -1,10 +1,15 @@
 package com.wanli.com.multitypedemo.api.view.impl;
 
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.RecyclerView.OnScrollListener;
 import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.wanli.com.multitypedemo.R;
@@ -15,8 +20,13 @@ import com.wanli.com.multitypedemo.api.presenter.impl.BookListPreImpl;
 import com.wanli.com.multitypedemo.api.view.IBookListView;
 import com.wanli.com.multitypedemo.bean.BookInfoResponse;
 import com.wanli.com.multitypedemo.bean.BookListResponse;
+import com.wanli.com.multitypedemo.bean.FooterLoadMoreBean;
 import com.wanli.com.multitypedemo.multi.prividers.BookListsProvider;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import me.drakeet.multitype.Item;
 import me.drakeet.multitype.MultiTypeAdapter;
 
 
@@ -39,6 +49,11 @@ public class BookListActivity extends BaseActivity implements IBookListView, Swi
 
     private MultiTypeAdapter adapter;
 
+    //代表所有的item,包括footer
+    private List<Item> items = new ArrayList<>();
+    //此处主要获取加载的size，否则不要此属性
+    private List<BookInfoResponse> bookInfoResponses = new ArrayList<>();
+
 //普通写法
 //    private List<BookInfoResponse> bookInfoResponses;
 //    private BookListAdapter bookListAdapter;
@@ -54,21 +69,71 @@ public class BookListActivity extends BaseActivity implements IBookListView, Swi
         this.swiperefresh = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh);
         this.rv = (RecyclerView) findViewById(R.id.rv_details);
         rv.setLayoutManager(new LinearLayoutManager(this));
+
+
+//        TextView textView = (TextView) findViewById(R.id.haha);
+//        textView.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                adapter.notifyItemRemoved(0);
+//            }
+//        });
     }
 
 
+    private int itemCount;
+    private int lastVisibleItem;
+    private int page = 1;
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public void initEvent() {
         swiperefresh.setOnRefreshListener(this);
         iBookDetailsPresenter = new BookListPreImpl(this);
+        rv.addOnScrollListener(new OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if (newState == RecyclerView.SCROLL_STATE_IDLE && lastVisibleItem == itemCount - 1) {
+                    onLoadMore();
+                }
+            }
 
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                LinearLayoutManager manager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                itemCount = manager.getItemCount();
+                lastVisibleItem = manager.findLastCompletelyVisibleItemPosition();
+            }
+        });
+        mToolbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                rv.smoothScrollToPosition(1);
+            }
+        });
+
+        adapter = new MultiTypeAdapter(items);
+        rv.setAdapter(adapter);
+        adapter.register(BookInfoResponse.class, new BookListsProvider());
+        adapter.applyGlobalMultiTypePool(); // <- 使全局的类型加入到局部中来
         //普通写法
 //        bookInfoResponses = new ArrayList<>();
 //        bookListAdapter = new BookListAdapter(this, bookInfoResponses);
 //        rv.setAdapter(bookListAdapter);
 
+        footerLoadMoreBean = new FooterLoadMoreBean();
+
         onRefresh();
     }
+
+    FooterLoadMoreBean footerLoadMoreBean;
+
+    class onLoadMoreListener extends OnScrollListener {
+
+    }
+
 
     @Override
     protected void onResume() {
@@ -94,11 +159,24 @@ public class BookListActivity extends BaseActivity implements IBookListView, Swi
     @Override
     public void showData(Object result) {
         BookListResponse response = (BookListResponse) result;
-        adapter = new MultiTypeAdapter(response.getBooks());
-        adapter.register(BookInfoResponse.class, new BookListsProvider());
-        //assertAllRegistered(adapter, lists);
-        rv.setAdapter(adapter);
+        if (response.getStart() == 0) {
+            bookInfoResponses.clear();
+            bookInfoResponses.addAll(response.getBooks());
+            items.addAll(response.getBooks());
+            items.add(footerLoadMoreBean);
+            adapter.notifyItemInserted(bookInfoResponses.size());
+        } else {
+            adapter.notifyItemRemoved(lastVisibleItem);
+            items.remove(footerLoadMoreBean);
 
+            int start = bookInfoResponses.size();
+            bookInfoResponses.addAll(response.getBooks());
+            items.addAll(response.getBooks());
+            page++;
+
+            items.add(footerLoadMoreBean);
+            adapter.notifyItemRangeInserted(start+1, bookInfoResponses.size()+1);
+        }
 //普通写法
 //        bookInfoResponses.clear();
 //        bookInfoResponses.addAll(response.getBooks());
@@ -108,5 +186,9 @@ public class BookListActivity extends BaseActivity implements IBookListView, Swi
     @Override
     public void onRefresh() {
         iBookDetailsPresenter.loadBooks(null, tag, 0, count, fields);
+    }
+
+    public void onLoadMore() {
+        iBookDetailsPresenter.loadBooks(null, tag, page * count, count, fields);
     }
 }
