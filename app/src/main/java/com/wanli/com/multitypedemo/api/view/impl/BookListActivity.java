@@ -110,7 +110,7 @@ public class BookListActivity extends BaseActivity implements IBookListView, Swi
         mToolbar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                rv.smoothScrollToPosition(1);
+                rv.smoothScrollToPosition(0);
             }
         });
 
@@ -147,8 +147,12 @@ public class BookListActivity extends BaseActivity implements IBookListView, Swi
     }
 
     @Override
-    public void showProgress() {
-        swiperefresh.setRefreshing(true);
+    public void showProgress(boolean isRefresh) {
+        if (isRefresh) {
+            swiperefresh.setRefreshing(isRefresh);
+        } else {
+
+        }
     }
 
     @Override
@@ -160,22 +164,23 @@ public class BookListActivity extends BaseActivity implements IBookListView, Swi
     public void showData(Object result) {
         BookListResponse response = (BookListResponse) result;
         if (response.getStart() == 0) {
-            bookInfoResponses.clear();
-            bookInfoResponses.addAll(response.getBooks());
+            items.clear();
             items.addAll(response.getBooks());
             items.add(footerLoadMoreBean);
-            adapter.notifyItemInserted(bookInfoResponses.size());
+            adapter.notifyItemInserted(items.size() - 1);
+            if (page >= 1) {
+                page = 1;
+            }
         } else {
             adapter.notifyItemRemoved(lastVisibleItem);
             items.remove(footerLoadMoreBean);
 
-            int start = bookInfoResponses.size();
-            bookInfoResponses.addAll(response.getBooks());
+            int start = items.size();
             items.addAll(response.getBooks());
             page++;
 
             items.add(footerLoadMoreBean);
-            adapter.notifyItemRangeInserted(start+1, bookInfoResponses.size()+1);
+            adapter.notifyItemRangeInserted(start + 1, items.size() + 1);
         }
 //普通写法
 //        bookInfoResponses.clear();
@@ -185,10 +190,10 @@ public class BookListActivity extends BaseActivity implements IBookListView, Swi
 
     @Override
     public void onRefresh() {
-        iBookDetailsPresenter.loadBooks(null, tag, 0, count, fields);
+        iBookDetailsPresenter.loadBooks(null, tag, 0, count, fields, true);
     }
 
     public void onLoadMore() {
-        iBookDetailsPresenter.loadBooks(null, tag, page * count, count, fields);
+        iBookDetailsPresenter.loadBooks(null, tag, page * count, count, fields, false);
     }
 }

@@ -20,13 +20,13 @@ public class BookListPreImpl implements IBookListPresenter, ApiCompleteListener 
     private IBookListModel iBookDetailsModel;
 
     public BookListPreImpl(IBaseView iBookDetailsView) {
-        this.iBookDetailsView = (IBookListView)iBookDetailsView;
+        this.iBookDetailsView = (IBookListView) iBookDetailsView;
         iBookDetailsModel = new BookListModelImpl();
     }
 
     @Override
-    public void loadBooks(String q, String tag, int start, int count, String fields) {
-        iBookDetailsView.showProgress();
+    public void loadBooks(String q, String tag, int start, int count, String fields, boolean isRefresh) {
+        iBookDetailsView.showProgress(isRefresh);
         iBookDetailsModel.loadBookList(q, tag, start, count, fields, this);
     }
 

@@ -11,7 +11,7 @@ import com.wanli.com.multitypedemo.api.IBaseView;
 public interface IBookListView extends IBaseView {
     void showMessage(String msg);
 
-    void showProgress();
+    void showProgress(boolean isRefresh);
 
     void hideProgress();
 }
